@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tyzox - Tu Tienda de Boxeo</title>
+    <!-- Font Awesome desde CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Tu CSS principal -->
+    <link rel="stylesheet" href="{% static 'tyzox/css/style.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="nav-container">
+            <a href="#home" class="logo" aria-label="Tyzox Home">TYZOX</a>
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Buscar productos..." id="searchInput" aria-label="Buscar">
+                <button class="search-btn" onclick="performSearch()" aria-label="Buscar"><i class="fas fa-search"></i></button>
+            </div>
+            <nav class="nav-links" role="navigation" aria-label="Main Navigation">
+                <a href="#home" class="nav-link">Inicio</a>
+                <a href="#products" class="nav-link">Productos</a>
+                <a href="#routines" class="nav-link">Rutinas</a>
+                <!-- Enlace a la página de login usando la URL de Django -->
+                                {% comment %} --- INICIO DEL BLOQUE CORREGIDO --- {% endcomment %}
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="nav-link" id="loginLink">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </a>
+                {% else %}
+                    {# Aquí corregimos 'login' por 'login_register' #}
+                    <a href="{% url 'login_register' %}" class="nav-link" id="loginLink">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                {% endif %}
+
+                {% comment %} --- FIN DEL BLOQUE CORREGIDO --- {% endcomment %}
+                <button id="theme-toggle" class="nav-link" aria-label="Cambiar tema">🌙</button>
+            </nav>
+            <button class="hamburger" aria-label="Toggle Menu" aria-expanded="false">
+                <span class="hamburger-icon">☰</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" role="main">
+        <!-- Hero Section -->
+        <section class="hero" id="home" role="region" aria-labelledby="hero-title">
+             <div class="hero-content">
+                <h1 id="hero-title">TYZOX</h1>
+                <p>Tu destino completo para equipamiento de boxeo profesional y rutinas de entrenamiento personalizadas.</p>
+                <a href="#products" class="btn-primary" role="button">Explorar Productos</a>
+            </div>
+            <section class="hero-gallery">
+                <img src="https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Guantes de Boxeo">
+                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Saco de Boxeo">
+                <img src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Ring de Boxeo">
+                <img src="https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Entrenamiento">
+                <img src="https://images.unsplash.com/photo-1517438476312-10d79c077509?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Equipo Profesional">
+            </section>
+        </section>
+
+        <!-- Categories -->
+        <section class="categories" role="region" aria-labelledby="categories-title">
+            <h2 class="section-title" id="categories-title">Nuestras Categorías</h2>
+            <div class="category-grid">
+                <div class="category-card" onclick="filterProducts('guantes')" role="button" aria-label="Guantes de Boxeo">
+                    <h3>Guantes</h3>
+                </div>
+                <div class="category-card" onclick="filterProducts('sacos')" role="button" aria-label="Sacos y Peras">
+                    <h3>Sacos y Peras</h3>
+                </div>
+                <div class="category-card" onclick="filterProducts('proteccion')" role="button" aria-label="Protección">
+                    <h3>Protección</h3>
+                </div>
+                 <div class="category-card" onclick="filterProducts('ropa')" role="button" aria-label="Ropa Deportiva">
+                    <h3>Ropa</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products -->
+        <section class="products" id="products" role="region" aria-labelledby="products-title">
+            <h2 class="section-title" id="products-title">Productos Destacados</h2>
+            <div class="product-grid" id="productGrid">
+                <!-- Los productos se cargarán aquí dinámicamente con JavaScript -->
+            </div>
+        </section>
+
+        <!-- Routines -->
+        <section class="routines" id="routines" role="region" aria-labelledby="routines-title">
+            <h2 class="section-title" id="routines-title">Rutinas de Entrenamiento</h2>
+            <div class="routine-grid">
+                <div class="routine-card" onclick="openModal('routineModal', 'principiante')">
+                    <div class="routine-level">PRINCIPIANTE</div>
+                    <h3>Fundamentos del Boxeo</h3>
+                    <p>Aprende las bases: postura, movimientos y combinaciones simples.</p>
+                </div>
+                <div class="routine-card" onclick="openModal('routineModal', 'intermedio')">
+                    <div class="routine-level">INTERMEDIO</div>
+                    <h3>Técnica Avanzada</h3>
+                    <p>Perfecciona tu técnica con combinaciones complejas y trabajo de pies.</p>
+                </div>
+                <div class="routine-card" onclick="openModal('routineModal', 'profesional')">
+                    <div class="routine-level">PROFESIONAL</div>
+                    <h3>Preparación de Combate</h3>
+                    <p>Entrenamiento intensivo para competidores serios.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="#home">Inicio</a>
+                <a href="#products">Productos</a>
+                <a href="#routines">Rutinas</a>
+                <a href="#">Contacto</a>
+            </div>
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            </div>
+            <p>&copy; {% now "Y" %} TYZOX. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Modales -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('cartModal')">&times;</span>
+            <h2 class="modal-title">Tu Carrito</h2>
+            <div id="cartItems" class="cart-items"></div>
+            <div id="cartTotal" class="cart-total"></div>
+            <button class="modal-btn" onclick="checkout()">Finalizar Compra</button>
+        </div>
+    </div>
+    <div id="routineModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('routineModal')">&times;</span>
+            <h2 id="routineTitle" class="modal-title"></h2>
+            <p id="routineDescription" class="modal-text"></p>
+        </div>
+    </div>
+
+    <!-- Tu JavaScript principal -->
+   <script src="{% static 'tyzox/js/script.js' %}"></script>
+</body>
+</html>
