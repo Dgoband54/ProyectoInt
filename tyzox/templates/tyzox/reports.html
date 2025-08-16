@@ -1,0 +1,54 @@
+{% extends 'tyzox/base.html' %}
+{% load static %}
+
+{% block title %}Reporte de Ventas{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="nav-container">
+        <a href="{% url 'dashboard' %}" class="logo">TYZOX Admin</a>
+        <nav class="nav-links">
+            <a href="{% url 'dashboard' %}" class="nav-link">Gestión de Productos</a>
+            <a href="{% url 'index' %}" class="nav-link">Volver a la Tienda</a>
+        </nav>
+    </div>
+</div>
+
+<main class="main-content" style="padding: 2rem 4rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 class="section-title" style="margin-bottom: 0;">Reporte de Ventas por Producto</h1>
+        <a href="{% url 'export_sales_csv' %}" class="btn-primary" style="background: #27ae60;">
+            <i class="fas fa-file-csv"></i> Exportar a CSV
+        </a>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; color: #fff;">
+            <thead>
+                <tr style="background-color: #333;">
+                    <th style="padding: 1rem; text-align: left;">Producto</th>
+                    <th style="padding: 1rem; text-align: left;">Categoría</th>
+                    <th style="padding: 1rem; text-align: center;">Unidades Vendidas</th>
+                    <th style="padding: 1rem; text-align: right;">Ingresos Totales</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sales_report %}
+                <tr style="border-bottom: 1px solid #444;">
+                    <td style="padding: 1rem;">{{ item.product__name }}</td>
+                    <td style="padding: 1rem;">{{ item.product__category__name }}</td>
+                    <td style="padding: 1rem; text-align: center;">{{ item.total_sold }}</td>
+                    <td style="padding: 1rem; text-align: right;">${{ item.total_revenue|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding: 2rem; text-align: center;">
+                        Aún no hay datos de ventas para generar un reporte.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
+{% endblock %}

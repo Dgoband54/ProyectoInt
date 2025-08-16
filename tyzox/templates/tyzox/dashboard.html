@@ -1,0 +1,101 @@
+{% extends 'tyzox/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Administración{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="nav-container">
+        <a href="{% url 'index' %}" class="logo">TYZOX</a>
+        <nav class="nav-links">
+            <a href="{% url 'index' %}" class="nav-link">Volver a la Tienda</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+</div>
+
+<main class="main-content" style="padding: 2rem 4rem;">
+    <h1 class="section-title" style="margin-bottom: 2rem;">Panel de Gestión de Productos</h1>
+
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="color: #ccc;">Total de Productos: {{ products.count }}</h3>
+
+        <div> <!-- Envolvemos los botones en un div para agruparlos -->
+            <!-- NUEVO BOTÓN DE REPORTES -->
+            <a href="{% url 'reports' %}" class="btn-primary"
+                style="padding: 0.8rem 1.5rem; background: #1677b5; margin-right: 1rem;">Ver Reportes</a>
+            <a href="{% url 'product_add' %}" class="btn-primary" style="padding: 0.8rem 1.5rem;">+ Añadir Nuevo
+                Producto</a>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; color: #fff;">
+            <thead>
+                <tr style="background-color: #333;">
+                    <th style="padding: 1rem; text-align: left;">Nombre del Producto</th>
+                    <th style="padding: 1rem; text-align: left;">Categoría</th>
+                    <th style="padding: 1rem; text-align: right;">Precio</th>
+                    <th style="padding: 1rem; text-align: center;">Stock</th>
+                    <th style="padding: 1rem; text-align: center;">Disponible</th>
+                    <th style="padding: 1rem; text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr style="border-bottom: 1px solid #444;">
+                    <td style="padding: 1rem;">{{ product.name }}</td>
+                    <td style="padding: 1rem;">{{ product.category.name }}</td>
+                    <td style="padding: 1rem; text-align: right;">${{ product.price }}</td>
+                    <td style="padding: 1rem; text-align: center;">{{ product.stock }}</td>
+                    <td style="padding: 1rem; text-align: center;">
+                        {% if product.is_available %}
+                        <i class="fas fa-check-circle" style="color: #2ecc71;"></i>
+                        {% else %}
+                        <i class="fas fa-times-circle" style="color: #e74c3c;"></i>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 1rem; text-align: center;">
+                        <a href="{% url 'product_edit' product.id %}"
+                            style="color: #f7931e; margin: 0 0.5rem; text-decoration: none; font-family: Arial, sans-serif; font-size: 1rem;">Editar</a>
+
+                        <button class="delete-btn" data-url="{% url 'product_delete' product.id %}"
+                            data-product-name="{{ product.name }}"
+                            style="background: none; border: none; color: #e74c3c; cursor: pointer; font-family: Arial, sans-serif; font-size: 1rem; margin: 0 0.5rem; padding: 0; vertical-align: baseline;">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="padding: 2rem; text-align: center;">No hay productos en la base de datos.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Confirmación de Borrado -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <h2 class="modal-title">Confirmar Eliminación</h2>
+            <p style="font-size: 1.2rem; color: #ccc;" id="deleteModalText">
+                ¿Estás seguro de que deseas eliminar este producto?
+            </p>
+            <p style="color: #e74c3c; font-weight: bold; margin-top: 1rem;">
+                <i class="fas fa-exclamation-triangle"></i> ¡Esta acción no se puede deshacer!
+            </p>
+            <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem;">
+                <button id="cancelDeleteBtn" class="modal-btn" style="background: #555;">Cancelar</button>
+                <button id="confirmDeleteBtn" class="modal-btn" style="background: #e74c3c;">Sí, Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+</main>
+{% endblock %}

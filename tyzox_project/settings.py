@@ -80,7 +80,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'tyzox_db',
-        'USER': 'postgres',
+        'USER': 'tyzox_user',
         'PASSWORD': '1234',   # ¡RECUERDA CAMBIAR ESTO EN PRODUCCIÓN!
         'HOST': 'localhost',
         'PORT': '5432',
@@ -142,7 +142,7 @@ STATIC_URL = '/static/'
 # Aquí le decimos a Django que busque archivos estáticos adicionales
 # en la carpeta 'static' que está DENTRO de tu aplicación 'tyzox'.
 STATICFILES_DIRS = [
-    BASE_DIR / "tyzox" / "static",
+    BASE_DIR / "tyzox/static",
 ]
 
 
@@ -160,3 +160,6 @@ LOGIN_URL = 'login_register'
 # ==============================================================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

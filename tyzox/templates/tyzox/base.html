@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- El título será dinámico. Si una página hija no lo define, usará "Tu Tienda de Boxeo" -->
+    <title>Tyzox - {% block title %}Tu Tienda de Boxeo{% endblock %}</title>
+
+    <!-- Font Awesome desde CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Nuestro CSS principal unificado -->
+    <link rel="stylesheet" href="{% static 'tyzox/css/style.css' %}">
+
+    <!-- Bloque para añadir CSS o meta-tags extra si una página lo necesita -->
+    {% block head_extra %}{% endblock %}
+
+</head>
+
+<!-- La clase del body también será dinámica, útil para la página de login -->
+
+<body class="{% block body_class %}{% endblock %}">
+
+    <!-- AÑADE ESTE BLOQUE PARA MOSTRAR MENSAJES -->
+    {% if messages %}
+    <div class="messages" style="padding: 1rem; list-style: none; text-align: center;">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}"
+            style="background-color: #2ecc71; color: white; border-radius: 5px; margin-bottom: 1rem; padding: 1rem;">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- El contenido principal de cada página irá aquí -->
+    {% block content %}{% endblock %}
+    <!-- Bloque para scripts extra, como los datos de los productos -->
+    {% block scripts_extra %}{% endblock %}
+
+    <!-- Nuestro JavaScript principal unificado (lo llamaremos script.js como pediste) -->
+    <script src="{% static 'tyzox/js/script.js' %}"></script>
+</body>
+
+</html>

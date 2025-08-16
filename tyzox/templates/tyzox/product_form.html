@@ -1,0 +1,49 @@
+{% extends 'tyzox/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if product %}Editar Producto{% else %}Añadir Nuevo Producto{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="nav-container">
+        <a href="{% url 'dashboard' %}" class="logo">TYZOX Admin</a>
+        <nav class="nav-links">
+            <a href="{% url 'dashboard' %}" class="nav-link">Volver al Dashboard</a>
+        </nav>
+    </div>
+</div>
+
+<main class="main-content" style="padding: 2rem 4rem;">
+    <h1 class="section-title">
+        {% if product %}
+            Editar Producto: {{ product.name }}
+        {% else %}
+            Añadir Nuevo Producto
+        {% endif %}
+    </h1>
+
+    <form method="POST" class="form-container-admin" style="max-width: 800px; margin: 0 auto; background-color: #2a2a2a; padding: 2rem; border-radius: 10px;">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div style="margin-bottom: 1.5rem;">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small style="color: #888; display: block; margin-top: 5px;">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p style="color: #e74c3c; font-size: 0.9rem; margin-top: 5px;">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div style="text-align: right; margin-top: 2rem;">
+            <a href="{% url 'dashboard' %}" style="color: #ccc; text-decoration: none; margin-right: 1rem;">Cancelar</a>
+            <button type="submit" class="btn-primary">Guardar Producto</button>
+        </div>
+    </form>
+</main>
+{% endblock %}

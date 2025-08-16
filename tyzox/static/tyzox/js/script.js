@@ -1,41 +1,141 @@
-// ================================
-// TYZOX - JavaScript Mejorado
-// ================================
+// static/tyzox/js/main.js
 
-// Variables globales mejoradas
-let token = localStorage.getItem('token') || null;
-let currentUser = JSON.parse(localStorage.getItem('user')) || null;
-let cart = [];
+// ============================================
+// TYZOX - SCRIPT PRINCIPAL UNIFICADO
+// ============================================
 
-// Configuración de la API - Cambiar según tu backend
-const API_BASE_URL = '/api'; // Para Django/PHP
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM cargado. Inicializando Tyzox...');
 
-// ================================
-// UTILIDADES Y CONFIGURACIÓN
-// ================================
-const getHeaders = (includeAuth = false) => {
-    const headers = { 'Content-Type': 'application/json' };
-    if (includeAuth && token) {
-        headers['Authorization'] = `Token ${token}`; // Sintaxis para Django Rest Framework
+    // --- LÓGICA PARA LA PÁGINA DE INICIO (INDEX.HTML) ---
+    const productGrid = document.getElementById('productGrid');
+    if (productGrid) {
+        console.log('Estás en la página de inicio. Cargando productos...');
+        const allProducts = JSON.parse(document.getElementById('products-data').textContent);
+        renderProducts(allProducts); // Render inicial
+
+        // Asignar eventos a los filtros de categoría
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const categorySlug = card.getAttribute('data-category-slug');
+                renderProducts(allProducts, categorySlug);
+            });
+        });
     }
-    return headers;
-};
 
-const handleApiError = async (response) => {
-    if (!response.ok) {
-        let errorMessage = 'Error en la conexión';
-        try {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorData.error || errorData.detail || errorMessage;
-        } catch (e) {
-            console.warn('No se pudo parsear el error:', e);
+    // --- LÓGICA PARA LA PÁGINA DE LOGIN (LOGIN.HTML) ---
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        console.log('Estás en la página de login/registro.');
+        // No necesitamos hacer nada aquí porque los eventos están en el HTML (onclick, onsubmit)
+        // Las funciones handleLogin, switchTab, etc., ya estarán disponibles globalmente.
+    }
+
+    // --- LÓGICA COMÚN A TODAS LAS PÁGINAS ---
+    const hamburger = document.querySelector('.hamburger');
+    const nav = document.querySelector('.nav-links');
+    if (hamburger && nav) {
+        hamburger.addEventListener('click', () => {
+            nav.classList.toggle('nav-active');
+        });
+    }
+
+    window.onclick = (event) => {
+        if (event.target.classList.contains('modal')) {
+            closeModal(event.target.id);
         }
-        throw new Error(errorMessage);
-    }
-    return response.json();
-};
+    };
+});
 
-const showNotification = (message, type = 'info', duration = 3000) => {
+
+// ============================================
+// FUNCIONES PARA LA PÁGINA DE INICIO
+// ============================================
+
+function renderProducts(products, categorySlug = 'all') {
+    const productGrid = document.getElementById('productGrid');
+    if (!productGrid) return;
+
+    productGrid.innerHTML = ''; // Limpiamos la grilla
+
+    const filteredProducts = categorySlug === 'all'
+        ? products
+        : products.filter(p => p.category_slug === categorySlug);
+
+    if (filteredProducts.length === 0) {
+        productGrid.innerHTML = '<p>No se encontraron productos en esta categoría.</p>';
+        return;
+    }
+
+    filteredProducts.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+            <div class="product-image">
+                <img src="${product.image_url || 'https://via.placeholder.com/300x200'}" alt="${product.name}" loading="lazy"/>
+            </div>
+            <div class="product-name">${product.name}</div>
+            <div class="product-price">$${product.price}</div>
+            <button class="btn-add-cart" onclick="addToCart(${product.id})">
+                <i class="fas fa-cart-plus"></i> Agregar
+            </button>
+        `;
+        productGrid.appendChild(card);
+    });
+}
+
+function addToCart(productId) {
+    showNotification(`Producto ${productId} agregado al carrito (simulado).`, 'success');
+}
+
+// ============================================
+// FUNCIONES PARA LA PÁGINA DE LOGIN/REGISTRO
+// ============================================
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+    
+    document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+    document.getElementById(tab + 'Form').classList.add('active');
+    
+    hideMessages();
+}
+
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = input.parentElement.querySelector('.password-toggle i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+    // La lógica de handleLogin que ya tenías
+    console.log("Manejando login...");
+    // ... tu código de fetch a /api/login/ ...
+}
+
+async function handleRegister(event) {
+    event.preventDefault();
+    // La lógica de handleRegister que ya tenías
+    console.log("Manejando registro...");
+    // ... tu código de fetch a /api/register/ ...
+}
+
+
+// ============================================
+// FUNCIONES AUXILIARES Y COMUNES
+// ============================================
+
+function showNotification(message, type = 'info', duration = 3000) {
     let notification = document.getElementById('notification');
     if (!notification) {
         notification = document.createElement('div');
@@ -60,188 +160,106 @@ const showNotification = (message, type = 'info', duration = 3000) => {
         notification.style.opacity = '0';
         notification.style.transform = 'translateY(-20px)';
     }, duration);
-};
+}
 
-// ================================
-// GESTIÓN DE AUTENTICACIÓN
-// ================================
-const updateLoginUI = () => {
-    const loginLink = document.getElementById('loginLink');
-    if (loginLink) {
-        if (currentUser) {
-            loginLink.innerHTML = `<i class="fas fa-user"></i> Hola, ${currentUser.name || currentUser.username}`;
-            // Aquí puedes agregar un menú de usuario o un enlace al perfil
-        } else {
-            loginLink.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
-        }
-    }
-};
+function showMessage(message, type = 'error') {
+    hideMessages();
+    const messageEl = document.getElementById(type + 'Message');
+    messageEl.textContent = message;
+    messageEl.style.display = 'block';
+}
 
-const logout = () => {
-    token = null;
-    currentUser = null;
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    cart = [];
-    updateLoginUI();
-    updateCartCount();
-    showNotification('Has cerrado sesión correctamente', 'info');
-};
+function hideMessages() {
+    document.getElementById('errorMessage').style.display = 'none';
+    document.getElementById('successMessage').style.display = 'none';
+}
 
-
-// ================================
-// GESTIÓN DE PRODUCTOS
-// ================================
-const sampleProducts = [
-    { id: 1, nombre: "Guantes Profesionales Everlast", precio: 89.99, categoria: "guantes", imagen: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-    { id: 2, nombre: "Saco de Boxeo Heavy Bag", precio: 199.99, categoria: "sacos", imagen: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-    { id: 3, nombre: "Casco Protector Pro", precio: 129.99, categoria: "proteccion", imagen: "https://images.unsplash.com/photo-1517438476312-10d79c077509?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-    { id: 4, nombre: "Shorts de Boxeo Premium", precio: 45.99, categoria: "ropa", imagen: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-    { id: 5, nombre: "Pera de Velocidad", precio: 75.50, categoria: "sacos", imagen: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
-    { id: 6, nombre: "Vendas de Boxeo", precio: 15.99, categoria: "proteccion", imagen: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" }
-];
-
-const renderProducts = async (filter = 'all') => {
-    const productGrid = document.getElementById('productGrid');
-    if (!productGrid) return;
-    
-    productGrid.innerHTML = '<p>Cargando productos...</p>';
-    
-    try {
-        // En un entorno real, harías un fetch a tu API de Django.
-        // const response = await fetch(`${API_BASE_URL}/products/`);
-        // let products = await handleApiError(response);
-        let products = sampleProducts; // Usando datos de ejemplo por ahora
-
-        productGrid.innerHTML = '';
-        const filteredProducts = filter === 'all' ? products : products.filter(p => p.categoria === filter);
-
-        if (filteredProducts.length === 0) {
-            productGrid.innerHTML = '<p>No se encontraron productos.</p>';
-            return;
-        }
-
-        filteredProducts.forEach(product => {
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.innerHTML = `
-                <div class="product-image">
-                    <img src="${product.imagen || 'https://via.placeholder.com/300x200'}" alt="${product.nombre}" loading="lazy"/>
-                </div>
-                <div class="product-name">${product.nombre}</div>
-                <div class="product-price">$${product.precio}</div>
-                <button class="btn-add-cart" onclick="addToCart(${product.id})">
-                    <i class="fas fa-cart-plus"></i> Agregar
-                </button>
-            `;
-            productGrid.appendChild(card);
-        });
-    } catch (error) {
-        console.error('Error al renderizar productos:', error);
-        productGrid.innerHTML = `<p>Error al cargar productos. Intenta de nuevo.</p>`;
-    }
-};
-
-const filterProducts = (category) => {
-    renderProducts(category);
-};
-
-// ================================
-// GESTIÓN DEL CARRITO
-// ================================
-const addToCart = (productId) => {
-    if (!token) {
-        showNotification('Por favor, inicia sesión para añadir al carrito', 'info');
-        // Opcional: redirigir al login
-        // window.location.href = '/login'; 
-        return;
-    }
-    console.log(`Añadiendo producto ${productId} al carrito.`);
-    showNotification('Producto agregado (simulado)', 'success');
-    // Aquí iría la lógica fetch para añadir al carrito en el backend
-};
-
-const updateCartCount = () => {
-    // Lógica para obtener el número de items del backend y actualizar #cartCount
-};
-
-const openCart = () => {
-     if (!token) {
-        showNotification('Inicia sesión para ver tu carrito', 'info');
-        return;
-    }
-    openModal('cartModal');
-    // Aquí iría la lógica fetch para obtener los items del carrito y mostrarlos
-};
-
-// ================================
-// BÚSQUEDA
-// ================================
-let searchTimeout;
-const performSearch = () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        const query = document.getElementById('searchInput')?.value.toLowerCase().trim();
-        if (!query) {
-            renderProducts();
-            return;
-        }
-        const filtered = sampleProducts.filter(p => p.nombre.toLowerCase().includes(query));
-        // Aquí puedes adaptar la función renderProducts para que acepte un array de productos
-        console.log("Resultados de búsqueda:", filtered);
-    }, 300);
-};
-
-// ================================
-// GESTIÓN DE MODALES
-// ================================
-const openModal = (id, data = null) => {
+function openModal(id) {
     const modal = document.getElementById(id);
-    if (!modal) return;
-    
-    if (id === 'routineModal' && data) {
-        const routines = {
-            principiante: { title: 'Fundamentos del Boxeo', desc: '...' },
-            intermedio: { title: 'Técnica Avanzada', desc: '...' },
-            profesional: { title: 'Preparación de Combate', desc: '...' }
-        };
-        const routine = routines[data];
-        if (routine) {
-            document.getElementById('routineTitle').textContent = routine.title;
-            document.getElementById('routineDescription').textContent = routine.desc;
+    if(modal) modal.style.display = 'flex';
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if(modal) modal.style.display = 'none';
+}
+
+// ===================================================
+// === LÓGICA PARA ELIMINAR CON MODAL DE CONFIRMACIÓN ===
+// ===================================================
+
+// Función para obtener el CSRF token (esencial para peticiones POST en Django)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
     }
-    
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-};
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
 
-const closeModal = (id) => {
-    const modal = document.getElementById(id);
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-};
 
-// ================================
-// EVENT LISTENERS Y INICIALIZACIÓN
-// ================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM cargado. Inicializando Tyzox...');
-    
-    updateLoginUI();
-    renderProducts();
-    
-    const hamburger = document.querySelector('.hamburger');
-    const nav = document.querySelector('.nav-links');
-    hamburger.addEventListener('click', () => {
-        nav.classList.toggle('nav-active');
-    });
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const modalText = document.getElementById('deleteModalText');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 
-    window.onclick = (event) => {
-        if (event.target.classList.contains('modal')) {
-            closeModal(event.target.id);
-        }
-    };
+    // Comprobamos si estamos en el dashboard
+    if (deleteModal) {
+        // Añadimos un listener a todos los botones de eliminar
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                
+                const url = button.dataset.url;
+                const productName = button.dataset.productName;
+
+                // Personalizamos el texto del modal y mostramos el modal
+                modalText.innerHTML = `¿Estás seguro de que deseas eliminar permanentemente el producto <strong style="color: #ff6b35;">"${productName}"</strong>?`;
+                deleteModal.style.display = 'flex';
+
+                // Cuando se hace clic en "Confirmar", realizamos la petición fetch
+                confirmDeleteBtn.onclick = () => {
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json'
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Si el borrado fue exitoso, eliminamos la fila de la tabla
+                            button.closest('tr').remove();
+                            showNotification(data.message, 'success');
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Ocurrió un error de red.', 'error');
+                    })
+                    .finally(() => {
+                        // Ocultamos el modal
+                        deleteModal.style.display = 'none';
+                    });
+                };
+            });
+        });
+
+        // El botón de cancelar simplemente oculta el modal
+        cancelDeleteBtn.onclick = () => {
+            deleteModal.style.display = 'none';
+        };
+    }
 });
