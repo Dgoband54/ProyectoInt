@@ -3,25 +3,27 @@
 
 {% block title %}Reporte de Ventas{% endblock %}
 
-{% block content %}
-<div class="header">
+{% block header %}
+<header class="header">
     <div class="nav-container">
-        <a href="{% url 'dashboard' %}" class="logo">TYZOX Admin</a>
+        <a href="{% url 'dashboard' %}" class="logo">TYZOX ADMIN</a>
         <nav class="nav-links">
             <a href="{% url 'dashboard' %}" class="nav-link">Gestión de Productos</a>
             <a href="{% url 'index' %}" class="nav-link">Volver a la Tienda</a>
+            <a href="{% url 'logout' %}" class="nav-link">Cerrar Sesión</a>
         </nav>
     </div>
-</div>
+</header>
+{% endblock header %}
 
-<main class="main-content" style="padding: 2rem 4rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+{% block content %}
+<div class="main-content" style="padding: 2rem 4rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <h1 class="section-title" style="margin-bottom: 0;">Reporte de Ventas por Producto</h1>
         <a href="{% url 'export_sales_csv' %}" class="btn-primary" style="background: #27ae60;">
             <i class="fas fa-file-csv"></i> Exportar a CSV
         </a>
     </div>
-
     <div style="overflow-x: auto;">
         <table style="width: 100%; border-collapse: collapse; color: #fff;">
             <thead>
@@ -50,5 +52,5 @@
             </tbody>
         </table>
     </div>
-</main>
-{% endblock %}
+</div>
+{% endblock content %}

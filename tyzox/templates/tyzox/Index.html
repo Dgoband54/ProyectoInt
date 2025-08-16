@@ -4,39 +4,7 @@
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
-    <!-- Header -->
-    <header class="header" role="banner">
-        <!-- ... (Tu código del header va aquí sin cambios) ... -->
-        <div class="nav-container">
-            <a href="#home" class="logo" aria-label="Tyzox Home">TYZOX</a>
-            <div class="search-container">
-                <input type="text" class="search-bar" placeholder="Buscar productos..." id="searchInput" aria-label="Buscar">
-                <button class="search-btn" onclick="performSearch()" aria-label="Buscar"><i class="fas fa-search"></i></button>
-            </div>
-            <nav class="nav-links" role="navigation" aria-label="Main Navigation">
-                <a href="#home" class="nav-link">Inicio</a>
-                <a href="#products" class="nav-link">Productos</a>
-                <a href="#routines" class="nav-link">Rutinas</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}" class="nav-link" id="loginLink">
-                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                    </a>
-                {% else %}
-                    <a href="{% url 'login_register' %}" class="nav-link" id="loginLink">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </a>
-                {% endif %}
-                <button id="theme-toggle" class="nav-link" aria-label="Cambiar tema">🌙</button>
-            </nav>
-            <button class="hamburger" aria-label="Toggle Menu" aria-expanded="false">
-                <span class="hamburger-icon">☰</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Content -->
     <main class="main-content" role="main">
-        <!-- ... (Tu código del hero, categories, products, y routines va aquí sin cambios) ... -->
         <!-- Hero Section -->
         <section class="hero" id="home" role="region" aria-labelledby="hero-title">
             <div class="hero-content">
@@ -55,38 +23,41 @@
 
         <!-- Categories -->
         <section class="categories" role="region" aria-labelledby="categories-title">
-            <!-- ... (contenido de categorías) ... -->
+             <h2 class="section-title" id="categories-title">Nuestras Categorías</h2>
+            <div class="category-grid">
+                <!-- ... contenido de categorías ... -->
+            </div>
         </section>
 
         <!-- Products -->
         <section class="products" id="products" role="region" aria-labelledby="products-title">
             <h2 class="section-title" id="products-title">Productos Destacados</h2>
             <div class="product-grid" id="productGrid">
-                <!-- Los productos se cargarán aquí dinámicamente con JavaScript -->
+                <!-- Los productos se cargarán aquí dinámicamente -->
             </div>
         </section>
 
         <!-- Routines -->
         <section class="routines" id="routines" role="region" aria-labelledby="routines-title">
-            <!-- ... (contenido de rutinas) ... -->
+            <!-- ... contenido de rutinas ... -->
         </section>
+
+        <!-- Modales -->
+        <div id="cartModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('cartModal')">&times;</span>
+                <h2 class="modal-title">Tu Carrito</h2>
+                <div id="cartItems" class="cart-items"></div>
+                <div id="cartTotal" class="cart-total"></div>
+                <button class="modal-btn" onclick="checkout()">Finalizar Compra</button>
+            </div>
+        </div>
+        <div id="routineModal" class="modal">
+            <!-- ... contenido del modal de rutinas ... -->
+        </div>
     </main>
-
-    <!-- Footer -->
-    <footer class="footer" role="contentinfo">
-        <!-- ... (Tu código del footer va aquí sin cambios) ... -->
-    </footer>
-
-    <!-- Modales -->
-    <div id="cartModal" class="modal">
-        <!-- ... (código del modal) ... -->
-    </div>
-    <div id="routineModal" class="modal">
-        <!-- ... (código del modal) ... -->
-    </div>
 {% endblock %}
 
 {% block scripts_extra %}
-    {# Este bloque inyecta los datos de los productos de Django en el HTML #}
     {{ products|json_script:"products-data" }}
 {% endblock %}
